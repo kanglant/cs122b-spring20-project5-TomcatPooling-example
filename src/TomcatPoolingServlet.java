@@ -15,14 +15,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@WebServlet(name = "TomcatPoolingServlet", urlPatterns = "/tomcat-pooling")
+@WebServlet(name = "TomcatPoolingServlet", urlPatterns = "/")
 public class TomcatPoolingServlet extends HttpServlet {
     public String getServletInfo() {
         return "Servlet connects to MySQL database and displays result of a SELECT";
     }
 
-    // Use http GET
-
+    // Use HTTP GET
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("text/html"); // Response mime type
@@ -36,23 +35,14 @@ public class TomcatPoolingServlet extends HttpServlet {
         try {
             // the following few lines are for connection pooling
             // Obtain our environment naming context
-
-            Context initCtx = new InitialContext();
-
-            Context envCtx = (Context) initCtx.lookup("java:comp/env");
-            if (envCtx == null)
-                out.println("envCtx is NULL");
-
-            // Look up our data source
-            DataSource ds = (DataSource) envCtx.lookup("jdbc/TestDB");
+            Context initContext = new InitialContext();
+            Context envContext = (Context) initContext.lookup("java:/comp/env");
+            DataSource ds = (DataSource) envContext.lookup("jdbc/moviedbexample");
 
             // the following commented lines are direct connections without pooling
             //Class.forName("org.gjt.mm.mysql.Driver");
             //Class.forName("com.mysql.jdbc.Driver").newInstance();
             //Connection dbcon = DriverManager.getConnection(loginUrl, loginUser, loginPasswd);
-
-            if (ds == null)
-                out.println("ds is null.");
 
             Connection dbcon = ds.getConnection();
             if (dbcon == null)
@@ -60,7 +50,7 @@ public class TomcatPoolingServlet extends HttpServlet {
 
             // Declare our statement
             Statement statement = dbcon.createStatement();
-            String query = "SELECT * from stars";
+            String query = "SELECT * from stars limit 10";
 
             // Perform the query
             ResultSet rs = statement.executeQuery(query);
